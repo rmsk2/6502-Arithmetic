@@ -9,6 +9,7 @@ run on the KIM-1 if it would have enough RAM. The following routines are provide
 - Addition
 - Subtraction
 - Comparisons: Equality, test for zero, greater or equal
+- Multiplication
 - Squaring
 - Left and right shifting one bit (i.e. multiplication and division by 2)
 - Copying (moving) 
