@@ -5,7 +5,7 @@ all: arith.bin
 
 ifdef MAC
 ACME=/Users/martin/data/acme/acme
-WORKDIR=/Users/martin/data/grlib
+WORKDIR=.
 else
 ACME=acme
 WORKDIR=.
