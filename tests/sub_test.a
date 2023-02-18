@@ -1,0 +1,18 @@
+* = $0800
+
+jmp start
+
+OPER_L
+!byte 0,0,0,0,0
+OPER_R
+!byte 0,0,0,0,0
+
+
+!zone arith
+!source "arith.a"
+
+!zone main
+
+start
+    +callFunc sub32Bit, OPER_L, OPER_R
+    brk

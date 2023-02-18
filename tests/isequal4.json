@@ -1,0 +1,5 @@
+{
+    "Name": "32 Bit is equal 4",
+    "TestDriverSource": "is_equal.a",
+    "TestScript": "isequal4.lua"
+}

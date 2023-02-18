@@ -1,0 +1,5 @@
+{
+    "Name": "32 Bit is zero 1",
+    "TestDriverSource": "is_zero.a",
+    "TestScript": "iszero1.lua"
+}

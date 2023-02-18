@@ -1,0 +1,13 @@
+* = $0800
+
+jmp start
+
+!zone arith
+!source "arith.a"
+
+!zone main
+
+; parameters are loaded from accu and x register
+start
+    jsr mul16Bit
+    brk

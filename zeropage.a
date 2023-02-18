@@ -1,0 +1,11 @@
+; It is assumed that these values are located in the zero page
+ARITH_SCRATCH1 = $FB
+ARITH_SCRATCH2 = $FC
+ARITH_SCRATCH3 = $FD
+ARITH_SCRATCH4 = $FE
+LOOKUP_SCRATCH1 = $F7
+LOOKUP_SCRATCH2 = $F8
+LOOKUP_SCRATCH3 = $F9
+COUNT_L = $9E
+COUNT_R = $9F
+HELP_MUL = $FA

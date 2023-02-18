@@ -1,0 +1,15 @@
+* = $0800
+
+jmp start
+
+OPER_L
+!byte 0,0,0,0,0
+
+!zone arith
+!source "arith.a"
+
+!zone main
+
+start
+    +callFuncMono halve32Bit, OPER_L
+    brk

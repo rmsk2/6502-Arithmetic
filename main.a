@@ -1,0 +1,30 @@
+!to "arith.bin", plain
+
+* = $1000
+
+I32_ADD
+    jmp add32Bit
+I32_SUB
+    jmp sub32Bit
+I32_NEG
+    jmp neg32Bit
+I32_MUL
+    jmp mul32Bit
+U16_MUL
+    jmp mul16Bit
+I32_SQU
+    jmp square32Bit
+I32_HLV
+    jmp halve32Bit
+I32_DBL
+    jmp double32Bit
+I32_CMP
+    jmp cmp32Bit
+I32_EQU
+    jmp isEqual32Bit
+I32_ZER
+    jmp isZero32Bit
+I32_MOV
+    jmp move32Bit
+
+!source "arith.a"

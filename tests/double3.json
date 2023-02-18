@@ -1,0 +1,5 @@
+{
+    "Name": "32 Bit double 3",
+    "TestDriverSource": "double1.a",
+    "TestScript": "double3.lua"
+}

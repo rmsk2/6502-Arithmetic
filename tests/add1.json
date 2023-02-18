@@ -1,0 +1,5 @@
+{
+    "Name": "32 Bit addition test 1",
+    "TestDriverSource": "add_test.a",
+    "TestScript": "add1.lua"
+}

@@ -1,0 +1,5 @@
+{
+    "Name": "32 Bit square test 1",
+    "TestDriverSource": "square_test.a",
+    "TestScript": "square1.lua"
+}

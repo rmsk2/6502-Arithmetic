@@ -1,0 +1,5 @@
+{
+    "Name": "32 Bit compare 1",
+    "TestDriverSource": "cmp_test.a",
+    "TestScript": "cmp1.lua"
+}

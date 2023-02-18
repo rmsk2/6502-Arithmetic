@@ -1,0 +1,5 @@
+{
+    "Name": "32 Bit move 1",
+    "TestDriverSource": "move1.a",
+    "TestScript": "move1.lua"
+}

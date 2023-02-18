@@ -1,0 +1,733 @@
+
+!source "zeropage.a"
+
+; --------------------------------------------------
+; load16BitImmediate loads the 16 bit value given in .val into the memory location given
+; by .addr 
+; --------------------------------------------------
+!macro load16BitImmediate .val, .addr {
+    lda #<.val
+    sta .addr
+    lda #>.val
+    sta .addr+1
+}
+
+
+; xy = (x^2 + y^2 - (x-y)^2)/2
+; The following tables contain the LSB and MSB of i^2 where i=0, ..., 255
+SQ_TAB_LSB
+!byte $00, $01, $04, $09, $10, $19, $24, $31, $40, $51, $64, $79, $90, $A9, $C4, $E1
+!byte $00, $21, $44, $69, $90, $B9, $E4, $11, $40, $71, $A4, $D9, $10, $49, $84, $C1
+!byte $00, $41, $84, $C9, $10, $59, $A4, $F1, $40, $91, $E4, $39, $90, $E9, $44, $A1
+!byte $00, $61, $C4, $29, $90, $F9, $64, $D1, $40, $B1, $24, $99, $10, $89, $04, $81
+!byte $00, $81, $04, $89, $10, $99, $24, $B1, $40, $D1, $64, $F9, $90, $29, $C4, $61
+!byte $00, $A1, $44, $E9, $90, $39, $E4, $91, $40, $F1, $A4, $59, $10, $C9, $84, $41
+!byte $00, $C1, $84, $49, $10, $D9, $A4, $71, $40, $11, $E4, $B9, $90, $69, $44, $21
+!byte $00, $E1, $C4, $A9, $90, $79, $64, $51, $40, $31, $24, $19, $10, $09, $04, $01
+!byte $00, $01, $04, $09, $10, $19, $24, $31, $40, $51, $64, $79, $90, $A9, $C4, $E1
+!byte $00, $21, $44, $69, $90, $B9, $E4, $11, $40, $71, $A4, $D9, $10, $49, $84, $C1
+!byte $00, $41, $84, $C9, $10, $59, $A4, $F1, $40, $91, $E4, $39, $90, $E9, $44, $A1
+!byte $00, $61, $C4, $29, $90, $F9, $64, $D1, $40, $B1, $24, $99, $10, $89, $04, $81
+!byte $00, $81, $04, $89, $10, $99, $24, $B1, $40, $D1, $64, $F9, $90, $29, $C4, $61
+!byte $00, $A1, $44, $E9, $90, $39, $E4, $91, $40, $F1, $A4, $59, $10, $C9, $84, $41
+!byte $00, $C1, $84, $49, $10, $D9, $A4, $71, $40, $11, $E4, $B9, $90, $69, $44, $21
+!byte $00, $E1, $C4, $A9, $90, $79, $64, $51, $40, $31, $24, $19, $10, $09, $04, $01
+
+SQ_TAB_MSB
+!byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+!byte $01, $01, $01, $01, $01, $01, $01, $02, $02, $02, $02, $02, $03, $03, $03, $03
+!byte $04, $04, $04, $04, $05, $05, $05, $05, $06, $06, $06, $07, $07, $07, $08, $08
+!byte $09, $09, $09, $0A, $0A, $0A, $0B, $0B, $0C, $0C, $0D, $0D, $0E, $0E, $0F, $0F
+!byte $10, $10, $11, $11, $12, $12, $13, $13, $14, $14, $15, $15, $16, $17, $17, $18
+!byte $19, $19, $1A, $1A, $1B, $1C, $1C, $1D, $1E, $1E, $1F, $20, $21, $21, $22, $23
+!byte $24, $24, $25, $26, $27, $27, $28, $29, $2A, $2B, $2B, $2C, $2D, $2E, $2F, $30
+!byte $31, $31, $32, $33, $34, $35, $36, $37, $38, $39, $3A, $3B, $3C, $3D, $3E, $3F
+!byte $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $4A, $4B, $4C, $4D, $4E, $4F
+!byte $51, $52, $53, $54, $55, $56, $57, $59, $5A, $5B, $5C, $5D, $5F, $60, $61, $62
+!byte $64, $65, $66, $67, $69, $6A, $6B, $6C, $6E, $6F, $70, $72, $73, $74, $76, $77
+!byte $79, $7A, $7B, $7D, $7E, $7F, $81, $82, $84, $85, $87, $88, $8A, $8B, $8D, $8E
+!byte $90, $91, $93, $94, $96, $97, $99, $9A, $9C, $9D, $9F, $A0, $A2, $A4, $A5, $A7
+!byte $A9, $AA, $AC, $AD, $AF, $B1, $B2, $B4, $B6, $B7, $B9, $BB, $BD, $BE, $C0, $C2
+!byte $C4, $C5, $C7, $C9, $CB, $CC, $CE, $D0, $D2, $D4, $D5, $D7, $D9, $DB, $DD, $DF
+!byte $E1, $E2, $E4, $E6, $E8, $EA, $EC, $EE, $F0, $F2, $F4, $F6, $F8, $FA, $FC, $FE
+
+
+; --------------------------------------------------
+; mul16BitFast mutiplies the bytes contained in accu and x register 
+; The high byte of the result is returned in accu, the lo byte in the x register.
+; The three macro parameters specify temporary memory to use by the calculation.
+;
+; The base behind the speedup is the formula xy = (x^2 + y^ 2 - (x-y)^2)/2
+; where the squares are read from the lookup tables above. This routine seems to be
+; twice as fast as the simple multiplication routine mul16BitShiftAdd which uses shift and add
+; --------------------------------------------------
+!macro mul16BitLookup .addr1, .addr2, .addr3 {
+.multiply:
+	sta .addr1
+	cpx .addr1
+	bcc .sorted
+	txa
+	ldx .addr1
+.sorted:
+	sta .addr3
+	stx .addr1
+	sec
+	sbc .addr1
+	tay
+	ldx .addr3
+	lda SQ_TAB_LSB,x
+	sbc SQ_TAB_LSB,y
+	sta .addr2
+	lda SQ_TAB_MSB,x
+	sbc SQ_TAB_MSB,y
+	sta .addr3
+	clc
+	ldx .addr1
+	lda .addr2
+	adc SQ_TAB_LSB,x
+	sta .addr2
+	lda .addr3
+	adc SQ_TAB_MSB,x
+	ror
+	ror .addr2
+	ldx .addr2	
+}
+
+; --------------------------------------------------
+; This subroutine takes its two operands in X and A and returns the result
+; The high byte of the result is returned in accu, the lo byte in the X register.
+; --------------------------------------------------
+mul16Bit
+    +mul16BitLookup LOOKUP_SCRATCH1, LOOKUP_SCRATCH2, LOOKUP_SCRATCH3
+    rts
+
+
+; --------------------------------------------------
+; The 32 bit integer routines represent a number as 5 bytes. The first byte
+; is the sign where 1 indicates a negative sign and 0 a positive sign. The sign byte
+; is followed by the 32 bits of the absolute value. The lowest value byte
+; contains the eight least significant bits followed by the next
+; more significant bits and so on.
+;
+; I.e. the memory layout is as follows: 
+;
+;  sign byte | byte 0 | byte 1 | byte 2 | byte 3
+; --------------------------------------------------
+
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4 
+; and adds them. This routine ignores the sign byte.
+;
+; The result is returned in the second operand, i.e. *opR <- *opL + *opR 
+; --------------------------------------------------
+add32BitUnsigned
+    ldy #1                         ; skip over sign byte
+    clc
+    lda (ARITH_SCRATCH1),y
+    adc (ARITH_SCRATCH3),y
+    sta (ARITH_SCRATCH3),y
+    iny
+    lda (ARITH_SCRATCH1),y
+    adc (ARITH_SCRATCH3),y
+    sta (ARITH_SCRATCH3),y    
+    iny
+    lda (ARITH_SCRATCH1),y
+    adc (ARITH_SCRATCH3),y
+    sta (ARITH_SCRATCH3),y    
+    iny
+    lda (ARITH_SCRATCH1),y
+    adc (ARITH_SCRATCH3),y
+    sta (ARITH_SCRATCH3),y    
+
+    rts
+
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4 
+; and subtracts them. The caller has to ensure that *opL >= *opR
+;
+; The result is returned in the second operand, i.e. *opR <- *opL - *opR 
+; --------------------------------------------------
+sub32BitUnsigned
+    ldy #1                         ; skip over sign byte
+    sec
+    lda (ARITH_SCRATCH1),y
+    sbc (ARITH_SCRATCH3),y
+    sta (ARITH_SCRATCH3),y
+    iny
+    lda (ARITH_SCRATCH1),y
+    sbc (ARITH_SCRATCH3),y
+    sta (ARITH_SCRATCH3),y    
+    iny
+    lda (ARITH_SCRATCH1),y
+    sbc (ARITH_SCRATCH3),y
+    sta (ARITH_SCRATCH3),y    
+    iny
+    lda (ARITH_SCRATCH1),y
+    sbc (ARITH_SCRATCH3),y
+    sta (ARITH_SCRATCH3),y    
+    rts
+
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4 
+; and subtracts them. The caller has to ensure that *opR >= *opL. This routine ignores the sign bytes.
+;
+; The result is returned in the second operand, i.e. *opR <- *opR - *opL 
+; --------------------------------------------------
+sub32SwitchedUnsigned
+    ldy #1                         ; skip over sign byte
+    sec
+    lda (ARITH_SCRATCH3),y
+    sbc (ARITH_SCRATCH1),y
+    sta (ARITH_SCRATCH3),y
+    iny
+    lda (ARITH_SCRATCH3),y
+    sbc (ARITH_SCRATCH1),y
+    sta (ARITH_SCRATCH3),y    
+    iny
+    lda (ARITH_SCRATCH3),y
+    sbc (ARITH_SCRATCH1),y
+    sta (ARITH_SCRATCH3),y    
+    iny
+    lda (ARITH_SCRATCH3),y
+    sbc (ARITH_SCRATCH1),y
+    sta (ARITH_SCRATCH3),y    
+    rts
+
+
+TEMP_MUL
+!byte 0,0,0,0,0,0,0,0
+
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4.
+; It multiplies its operands as if they were unsigned 32 bit integers.
+;
+; The result is returned in the eight byte buffer starting at TEMP_MUL. 
+; --------------------------------------------------
+mul32BitUnsigned
+    lda #0
+    sta COUNT_L                   ; clear counter for digits of left operand
+    sta COUNT_R                   ; clear counter for digits of right operand
+
+    ldx #7                        ; clear temp buffer
+    lda #0
+.clear                            
+    sta TEMP_MUL,X
+    dex
+    bpl .clear
+
+.loopMul
+    ldy COUNT_L
+    iny                           ; skip sign byte
+    lda (ARITH_SCRATCH1), y       ; load COUNT_L digit of left operand 
+    beq .noExtraCarry
+    tax                           ; and store it in X register
+    ldy COUNT_R                   ; load COUNT_R digit of right operand in accu
+    iny                           ; skip sign byte
+    lda (ARITH_SCRATCH3), y
+    beq .noExtraCarry
+    jsr mul16Bit                  ; multiply these 8 bit values. Result MSB in accu, LSB in x register
+    sta HELP_MUL                  ; store MSB of multiplication result in temp variable
+    lda COUNT_L                   ; calculate index of positon where to add the 16 bit result
+    clc
+    adc COUNT_R                   ; This position is COUNT_L + COUNT_R
+    tay                           ; move calculated index to y register
+    txa                           ; move LSB of multiplication result to accu
+    ;clc                          ; Carry is always clear due to the addition of COUNT_L and COUNT_R
+    adc TEMP_MUL, y               ; add LSB to intermediate result
+    sta TEMP_MUL, y
+    iny
+    lda HELP_MUL                  ; add MSB to intermediate result
+    adc TEMP_MUL, y
+    sta TEMP_MUL, y
+    bcc .noExtraCarry
+.carryLoop
+    iny
+    lda #0                        ; add carry to intermediate result
+    adc TEMP_MUL, y
+    sta TEMP_MUL, y
+    bcs .carryLoop
+.noExtraCarry
+    inc COUNT_L                   ; Move processing to next digit of left operand
+    lda COUNT_L
+    cmp #4
+    bne .loopMul
+    lda #0                        ; Move processing to next digit of right operand
+    sta COUNT_L
+    inc COUNT_R
+    lda COUNT_R
+    cmp #4
+    bne .loopMul
+
+    rts
+
+
+; --------------------------------------------------
+; This subroutine expects its operand in ARITH_SCRATCH1/2.
+; It squares its operand as if it was an unsigned 32 bit integer.
+;
+; The result is returned in the eight byte buffer starting at TEMP_MUL. 
+; --------------------------------------------------
+square32BitUnsigned
+    lda #0
+    sta COUNT_L                   ; clear counter for digits of left operand
+    sta COUNT_R                   ; clear counter for digits of right operand
+    ldx #7                        ; clear temp buffer
+    lda #0
+.squareClear                            
+    sta TEMP_MUL,X
+    dex
+    bpl .squareClear
+
+.loopSquare
+    lda #1
+    sta ARITH_SCRATCH3
+
+    ldy COUNT_L
+    cpy COUNT_R
+    bne .squareNormal
+    iny                           ; skip sign byte
+    lda (ARITH_SCRATCH1), y       ; load COUNT_L digit of left operand 
+    beq .noExtraCarrySquare
+    tay
+    lda SQ_TAB_LSB, y
+    tax
+    lda SQ_TAB_MSB, y
+    dec ARITH_SCRATCH3
+    jmp .processResult
+.squareNormal
+    iny                           ; skip sign byte
+    lda (ARITH_SCRATCH1), y       ; load COUNT_L digit of left operand 
+    beq .noExtraCarrySquare
+    tax                           ; and store it in X register
+    ldy COUNT_R                   ; load COUNT_R digit of right operand in accu
+    iny                           ; skip sign byte
+    lda (ARITH_SCRATCH1), y
+    beq .noExtraCarrySquare
+    jsr mul16Bit                  ; multiply these 8 bit values. Result MSB in accu, LSB in x register
+.processResult
+    sta HELP_MUL                  ; store MSB of multiplication result in temp variable
+.addTwice    
+    lda COUNT_L                   ; calculate index of positon where to add the 16 bit result
+    clc
+    adc COUNT_R                   ; This position is COUNT_L + COUNT_R
+    tay                           ; move calculated index to y register
+    txa                           ; move LSB of multiplication result to accu
+    ;clc                          ; Carry is always clear due to the addition of COUNT_L and COUNT_R
+    adc TEMP_MUL, y               ; add LSB to intermediate result
+    sta TEMP_MUL, y
+    iny
+    lda HELP_MUL                  ; add MSB to intermediate result
+    adc TEMP_MUL, y
+    sta TEMP_MUL, y
+    bcc .checkDoubleAdd
+.carryLoopSquare
+    iny
+    lda #0                         ; add carry to intermediate result
+    adc TEMP_MUL, y
+    sta TEMP_MUL, y
+    bcs .carryLoopSquare
+.checkDoubleAdd
+    dec ARITH_SCRATCH3
+    bne .noExtraCarrySquare
+    jmp .addTwice
+.noExtraCarrySquare
+    inc COUNT_L                   ; Move processing to next digit of left operand
+    lda COUNT_L
+    cmp COUNT_R
+    beq .loopSquare
+    bcc .loopSquare
+.nextDigit
+    lda #0                        ; Move processing to next digit of right operand
+    sta COUNT_L
+    inc COUNT_R
+    lda COUNT_R
+    cmp #4
+    beq .squareDone
+    jmp .loopSquare
+.squareDone
+    rts
+
+
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4 
+; and compares them. This routine ignores the sign byte it only compares the absolute values.
+;
+; The result is returned in the carry flag. Its is set if *opL >= *opR. In addition the the zero flag is set
+; when the values are equal.
+; --------------------------------------------------
+cmp32BitUnsigned
+    ldy #4                       ; start at MSB
+    lda (ARITH_SCRATCH1), y
+    cmp (ARITH_SCRATCH3), y
+    beq .next1                   ; continue if equal
+    rts                          ; carry contains result                   
+.next1
+    dey
+    lda (ARITH_SCRATCH1), y
+    cmp (ARITH_SCRATCH3), y
+    beq .next2                   ; continue if equal
+    rts                          ; carry contains result
+.next2
+    dey
+    lda (ARITH_SCRATCH1), y
+    cmp (ARITH_SCRATCH3), y
+    beq .next3                   ; continue if equal
+    rts                          ; carry contains result
+.next3                           ; We get here only if all bytes before were equal
+    dey
+    lda (ARITH_SCRATCH1), y
+    cmp (ARITH_SCRATCH3), y      ; carry contains result even if values are equal
+.endCmp
+    rts
+
+
+; --------------------------------------------------
+; This subroutine expects its operands in the zero page pointers ARITH_SCRATCH1 and ARITH_SCRATCH3
+; and checks if they are equal. This routine takes the sign into account, i.e. +0 und -0 are considered
+; to be equal. The special case where Null can have a positive or negative sign byte requires separate
+; logic in the code below.
+;
+; The result is returned in the zero flag. Its is set if *opL == *opR.
+; --------------------------------------------------
+isEqual32Bit
+    jsr cmp32BitUnsigned
+    bne .equalDone                ; absolute values are different => numbers are unequal, zero flag is already cleared
+    ; numbers are equal in their absolute value
+    jsr isZero32Bit               ; check if *opL  is zero
+    beq .equalDone                ; both values are zero => they are equal => return zero flag as result
+.notZero
+    ; Absolute values of operands are equal and they are nonzero => check sign bytes
+    ldy #0
+    lda (ARITH_SCRATCH1), y
+    eor (ARITH_SCRATCH3), y      ; zero flag is set if the signs are equal as in that case the XOR result is zero
+.equalDone
+    rts
+
+
+; --------------------------------------------------
+; This subroutine expects its operand in the zero page pointer ARITH_SCRATCH1 and checks whether the 
+; value referenced by it is equal to +0 or -0.
+;
+; The result is returned in the zero flag. It is set if *opL == +0 or -0.
+; --------------------------------------------------
+isZero32Bit
+    ldy #4                        ; count from 4 to 1, ignore sign byte
+.checkNextByte2
+    lda (ARITH_SCRATCH1), y
+    bne .notZero2                 ; There is at least one non zero byte, therefore the values is not zero. Zero flag remains clear
+    dey
+    bne .checkNextByte2           ; All bytes are zero => return with zero flag set (here Z is already set)
+.notZero2
+    rts
+
+
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4 
+; and compares them also considering the sign byte.
+;
+; The result is returned in the carry flag. Its is set if *opL >= *opR. In addition the 
+; zero flag is set when the values are equal.
+; --------------------------------------------------
+cmp32Bit
+    jsr isEqual32Bit
+    bne .unequal
+    ; values are equal
+    sec                            ; Zero flag is already set => also set carry and we are done
+    rts                            ; values are equal.
+    ; In this code we do not have to deal with the case that left *and* right are zero with or 
+    ; without different signs
+.unequal
+    ; If we are here the zero flag must not be
+    ; set upon return as the values are unequal.
+    ; We only have to deal with the carry flag.
+    ;
+    ; Check whether signs of left and right are equal
+    ldy #0
+    lda (ARITH_SCRATCH1), y
+    eor (ARITH_SCRATCH3), y
+    beq .signsEqual
+    ;
+    ; signs are unequal => left sign determines result.
+    clc
+    lda (ARITH_SCRATCH1), y
+    bne .done                     ; left number is negative => Carry is already clear => we are done
+    sec                           
+    bcs .done                     ; left number is positive => set carry and we are done
+.signsEqual
+    ; signs of left and right are equal => we have to compare them
+    lda (ARITH_SCRATCH1), y
+    beq .bothSignsPositive
+    ;
+    ; both signs are negative
+    jsr cmp32BitUnsigned
+    ; both signs are negative => result is negation of comparison of the absolute values
+    ; negate carry
+    bcs .leftSmaller
+    sec
+    bcs .done
+.leftSmaller
+    clc
+    bcc .done
+.bothSignsPositive
+    ;
+    ; both signs are positive => use result of comparison of the absolute values
+    jsr cmp32BitUnsigned
+.done
+    lda #1                         ; clear zero flag
+    rts
+
+
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4 
+; The routine copies the value of oL to oR
+;
+; The result is returned in the second operand, i.e. *opR <- *opL 
+; --------------------------------------------------
+move32Bit
+    ldy #4
+.loopMove
+    lda (ARITH_SCRATCH1),y
+    sta (ARITH_SCRATCH3),y
+    dey
+    bpl .loopMove
+
+    rts
+
+!macro move32BitInline .src, .target {
+    ldy #4
+.loopMove
+    lda .src,y
+    sta .target,y
+    dey
+    bpl .loopMove
+}
+
+; --------------------------------------------------
+; This subroutine expects its operand in ARITH_SCRATCH1/2.
+; The routine then doubles the value of its operand by simply performing a left shift. It
+; ignores the sign byte.
+;
+; The operand is modified, i.e. *op <- 2 * *op 
+; --------------------------------------------------
+double32Bit
+    ldy #1                        ; skip sign value
+    lda (ARITH_SCRATCH1),y
+    asl
+    sta (ARITH_SCRATCH1),y
+
+    iny
+    lda (ARITH_SCRATCH1),y
+    rol
+    sta (ARITH_SCRATCH1),y
+
+    iny
+    lda (ARITH_SCRATCH1),y
+    rol
+    sta (ARITH_SCRATCH1),y
+
+    iny
+    lda (ARITH_SCRATCH1),y
+    rol
+    sta (ARITH_SCRATCH1),y
+
+    rts
+
+
+; --------------------------------------------------
+; This subroutine expects it operand in ARITH_SCRATCH1/2.
+; The routine then halves the value of its operand by simply performing a right shift. It
+; ignores the sign byte.
+;
+; The operand is modified, i.e. *op <- *op / 2 
+; --------------------------------------------------
+halve32Bit
+    clc
+    ldy #4 
+    lda (ARITH_SCRATCH1),y                       
+    ror 
+    sta (ARITH_SCRATCH1),y
+    dey
+
+    lda (ARITH_SCRATCH1),y                       
+    ror 
+    sta (ARITH_SCRATCH1),y
+    dey
+
+    lda (ARITH_SCRATCH1),y                       
+    ror 
+    sta (ARITH_SCRATCH1),y
+    dey
+
+    lda (ARITH_SCRATCH1),y                       
+    ror 
+    sta (ARITH_SCRATCH1),y
+
+    rts
+
+LEFT_GREATER_EQUAL_RIGHT
+!byte 0
+
+!macro prepareAddSub {
+    lda #0
+    sta LEFT_GREATER_EQUAL_RIGHT
+    jsr cmp32BitUnsigned
+    bcc .leftLessThanRight
+    inc LEFT_GREATER_EQUAL_RIGHT
+.leftLessThanRight
+}
+
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4.
+; The routine adds the two operands and handles their signs correctly.
+;
+; The result is returned in the second operand, i.e. *opR <- *opL + *opR 
+; --------------------------------------------------
+add32Bit
+    +prepareAddSub
+    ldy #0
+    lda (ARITH_SCRATCH1), y
+    eor (ARITH_SCRATCH3), y
+    beq .simpleAdd                         ; signs are equal => simply add values
+    lda LEFT_GREATER_EQUAL_RIGHT
+    bne .normalSub
+    ; switched subtraction
+    ; sign of result is sign of opR
+    ; result is opR
+    jsr sub32SwitchedUnsigned
+    rts
+.normalSub
+    ; normal subtraction
+    ; sign of result is sign of opL
+    ; result is OpR
+    lda (ARITH_SCRATCH1), y                ; set sign of result   
+    sta (ARITH_SCRATCH3), y
+    jsr sub32BitUnsigned
+    rts
+.simpleAdd
+    ; addition
+    ; sign of both operands is equal
+    ; sign does not change
+    jsr add32BitUnsigned
+    rts
+
+
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4.
+; The routine subtracts the two operands and handles their signs correctly.
+;
+; The result is returned in the second operand, i.e. *opR <- *opL - *opR 
+; --------------------------------------------------
+sub32Bit
+    +prepareAddSub
+    ldy #0
+    lda (ARITH_SCRATCH1), y
+    eor (ARITH_SCRATCH3), y
+    bne .simpleAdd2                       ; signs are different
+    lda LEFT_GREATER_EQUAL_RIGHT
+    bne .normalSub2
+    ; switched subtraction
+    ; sign of result is flipped
+    ; result is opR
+    lda (ARITH_SCRATCH3), y               ; set sign of result
+    eor #1
+    sta (ARITH_SCRATCH3), y
+    jsr sub32SwitchedUnsigned
+    rts
+.normalSub2
+    ; normal subtraction
+    ; sign of result is unchanged
+    ; result is opR
+    jsr sub32BitUnsigned
+    rts
+.simpleAdd2
+    ; add both operands
+    ; sign of result is sign of opL
+    ; result is opR
+    lda (ARITH_SCRATCH1), y               ; set sign of result
+    sta (ARITH_SCRATCH3), y
+    jsr add32BitUnsigned
+    rts
+
+; --------------------------------------------------
+; This subroutine expects its operand in ARITH_SCRATCH1/2. 
+; The routine flips the sign of its operand
+;
+; The operand is modified, i.e. *op <- -*op 
+; --------------------------------------------------
+neg32Bit
+    ldy #0
+    lda (ARITH_SCRATCH1), y
+    eor #1
+    sta (ARITH_SCRATCH1), y
+    rts
+
+!macro neg32Inline .addr {
+    lda .addr
+    eor #1
+    sta .addr
+}
+
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4.
+; The routine multiplies the two operands and handles their signs correctly.
+;
+; The result is returned in the second operand, i.e. *opR <- *opL * *opR 
+; --------------------------------------------------
+mul32Bit
+    ldy #0
+    lda (ARITH_SCRATCH1),y                ; set sign of result
+    eor (ARITH_SCRATCH3),y
+    sta (ARITH_SCRATCH3),y
+
+    jsr mul32BitUnsigned
+
+    ; copy bytes 0,1,2,3 from TEMP_MUL
+    ; to bytes 1,2,3,4 of (ARITH_SCRATCH3)
+    ldy #1
+.loopNorm2
+    lda TEMP_MUL-1, y
+    sta (ARITH_SCRATCH3), y
+    iny
+    cpy #5
+    bne .loopNorm2
+
+    rts
+
+
+; --------------------------------------------------
+; This subroutine expects its operand in ARITH_SCRATCH1/2.
+; The routine squres its operand and handles the sign correctly.
+;
+; The result is returned in the operand, i.e. *opL <- *opL * *opL 
+; --------------------------------------------------
+square32Bit
+    ; The sign of the result always positive
+    lda #0
+    ldy #0
+    sta (ARITH_SCRATCH1), y                 
+
+    jsr square32BitUnsigned
+
+    ; copy bytes 0,1,2,3 from TEMP_MUL
+    ; to bytes 1,2,3,4 of (ARITH_SCRATCH1)
+    ldy #1
+.loopNorm3
+    lda TEMP_MUL-1, y
+    sta (ARITH_SCRATCH1), y
+    iny
+    cpy #5
+    bne .loopNorm3
+
+    rts    
+
+!macro callFunc .func, .addrL, .addrR {
+    +load16BitImmediate .addrL, ARITH_SCRATCH1
+    +load16BitImmediate .addrR, ARITH_SCRATCH3
+    jsr .func
+}
+
+!macro callFuncMono .func, .addrL {
+    +load16BitImmediate .addrL, ARITH_SCRATCH1
+    jsr .func
+}
+
