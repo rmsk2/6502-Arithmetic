@@ -1,0 +1,5 @@
+{
+    "Name": "16 Bit fixed point squaring 1",
+    "TestDriverSource": "fixed162.a",
+    "TestScript": "fixed162.lua"
+}

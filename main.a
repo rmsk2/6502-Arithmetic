@@ -1,5 +1,7 @@
 !to "arith.bin", plain
 
+FIXED8 = 1
+
 * = $1000
 
 I32_ADD
@@ -26,5 +28,11 @@ I32_ZER
     jmp isZero32Bit
 I32_MOV
     jmp move32Bit
+!ifdef FIXED8 {
+FP8_MUL
+    jmp mulFixedPoint8
+FP8_SQU
+    jmp squareFixedPoint8    
+}
 
 !source "arith.a"

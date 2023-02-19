@@ -1,0 +1,20 @@
+* = $0800
+
+FIXED16 = 1
+
+jmp start
+
+OPER_L
+!byte 0,0,0,0,0
+OPER_R
+!byte 0,0,0,0,0
+
+
+!zone arith
+!source "arith.a"
+
+!zone main
+
+start
+    +callFunc mulFixedPoint16, OPER_L, OPER_R
+    brk

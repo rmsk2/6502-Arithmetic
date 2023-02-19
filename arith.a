@@ -790,6 +790,88 @@ square32Bit
 
     rts    
 
+!ifdef FIXED8 {
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4.
+; The routine multiplies the two operands and handles their signs correctly.
+;
+; The result is returned in the second operand, i.e. *opR <- *opL * *opR 
+; --------------------------------------------------
+mulFixedPoint8
+    +mulCall ARITH_SCRATCH1, ARITH_SCRATCH3
+    +normalize ARITH_SCRATCH3, 3
+
+    rts
+
+; --------------------------------------------------
+; This subroutine expects its operand in ARITH_SCRATCH1/2.
+; The routine squres its operand and handles the sign correctly.
+;
+; The result is returned in the operand, i.e. *opL <- *opL * *opL 
+; --------------------------------------------------
+squareFixedPoint8
+    +squareCall ARITH_SCRATCH1
+    +normalize ARITH_SCRATCH1, 3
+
+    rts 
+
+}
+
+!ifdef FIXED16 {
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4.
+; The routine multiplies the two operands and handles their signs correctly.
+;
+; The result is returned in the second operand, i.e. *opR <- *opL * *opR 
+; --------------------------------------------------
+mulFixedPoint16
+    +mulCall ARITH_SCRATCH1, ARITH_SCRATCH3
+    +normalize ARITH_SCRATCH3, 2
+
+    rts
+
+; --------------------------------------------------
+; This subroutine expects its operand in ARITH_SCRATCH1/2.
+; The routine squres its operand and handles the sign correctly.
+;
+; The result is returned in the operand, i.e. *opL <- *opL * *opL 
+; --------------------------------------------------
+squareFixedPoint16
+    +squareCall ARITH_SCRATCH1
+    +normalize ARITH_SCRATCH1, 2
+
+    rts 
+
+}
+
+!ifdef FIXED24 {
+; --------------------------------------------------
+; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4.
+; The routine multiplies the two operands and handles their signs correctly.
+;
+; The result is returned in the second operand, i.e. *opR <- *opL * *opR 
+; --------------------------------------------------
+mulFixedPoint24
+    +mulCall ARITH_SCRATCH1, ARITH_SCRATCH3
+    +normalize ARITH_SCRATCH3, 1
+
+    rts
+
+; --------------------------------------------------
+; This subroutine expects its operand in ARITH_SCRATCH1/2.
+; The routine squres its operand and handles the sign correctly.
+;
+; The result is returned in the operand, i.e. *opL <- *opL * *opL 
+; --------------------------------------------------
+squareFixedPoint24
+    +squareCall ARITH_SCRATCH1
+    +normalize ARITH_SCRATCH1, 1
+
+    rts 
+
+}
+
+
 !macro callFunc .func, .addrL, .addrR {
     +load16BitImmediate .addrL, ARITH_SCRATCH1
     +load16BitImmediate .addrR, ARITH_SCRATCH3

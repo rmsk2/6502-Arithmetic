@@ -1,0 +1,5 @@
+{
+    "Name": "8 Bit fixed point 1",
+    "TestDriverSource": "fixed81.a",
+    "TestScript": "fixed81.lua"
+}
