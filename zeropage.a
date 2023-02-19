@@ -1,6 +1,4 @@
 FAST_MUL = 1
-;FIXED16 = 1
-;FIXED24 = 1
 
 ; It is assumed that these values are located in the zero page
 ARITH_SCRATCH1 = $FB

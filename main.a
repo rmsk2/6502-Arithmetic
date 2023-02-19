@@ -1,6 +1,8 @@
 !to "arith.bin", plain
 
-FIXED8 = 1
+;FIXED8 = 1
+;FIXED16 = 1
+;FIXED24 = 1
 
 * = $1000
 
@@ -28,11 +30,35 @@ I32_ZER
     jmp isZero32Bit
 I32_MOV
     jmp move32Bit
+
+; Fixed point multiplication 8 bit integer part, 24 bit fractional part
 !ifdef FIXED8 {
 FP8_MUL
     jmp mulFixedPoint8
 FP8_SQU
     jmp squareFixedPoint8    
+} else {
+!skip 6   ; make sure address of following routines does not change
+}
+
+; Fixed point multiplication 16 bit integer part, 16 bit fractional part
+!ifdef FIXED16 {
+FP16_MUL
+    jmp mulFixedPoint16
+FP16_SQU
+    jmp squareFixedPoint16
+} else {
+!skip 6    ; make sure address of following routines does not change
+}
+
+; Fixed point multiplication 24 bit integer part, 8 bit fractional part
+!ifdef FIXED24 {
+FP24_MUL
+    jmp mulFixedPoint24
+FP24_SQU
+    jmp squareFixedPoint24
+} else {
+!skip 6    ; make sure address of following routines does not change
 }
 
 !source "arith.a"

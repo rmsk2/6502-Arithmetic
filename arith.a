@@ -793,7 +793,9 @@ square32Bit
 !ifdef FIXED8 {
 ; --------------------------------------------------
 ; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4.
-; The routine multiplies the two operands and handles their signs correctly.
+; The routine multiplies the two operands and handles their signs correctly. It is
+; assumed that the most signifcant byte holds the integer part. Normalization
+; is performed in such way that the resulting number also fits this format.
 ;
 ; The result is returned in the second operand, i.e. *opR <- *opL * *opR 
 ; --------------------------------------------------
@@ -805,7 +807,9 @@ mulFixedPoint8
 
 ; --------------------------------------------------
 ; This subroutine expects its operand in ARITH_SCRATCH1/2.
-; The routine squres its operand and handles the sign correctly.
+; The routine squres its operand and handles the sign correctly. It is
+; assumed that the most signifcant byte holds the integer part. Normalization
+; is performed in such way that the resulting number also fits this format.
 ;
 ; The result is returned in the operand, i.e. *opL <- *opL * *opL 
 ; --------------------------------------------------
@@ -820,7 +824,9 @@ squareFixedPoint8
 !ifdef FIXED16 {
 ; --------------------------------------------------
 ; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4.
-; The routine multiplies the two operands and handles their signs correctly.
+; The routine multiplies the two operands and handles their signs correctly. It is
+; assumed that the two most signifcant bytes hold the integer part. Normalization
+; is performed in such way that the resulting number also fits this format.
 ;
 ; The result is returned in the second operand, i.e. *opR <- *opL * *opR 
 ; --------------------------------------------------
@@ -832,7 +838,9 @@ mulFixedPoint16
 
 ; --------------------------------------------------
 ; This subroutine expects its operand in ARITH_SCRATCH1/2.
-; The routine squres its operand and handles the sign correctly.
+; The routine squres its operand and handles the sign correctly. It is
+; assumed that the two most signifcant bytes hold the integer part. Normalization
+; is performed in such way that the resulting number also fits this format.
 ;
 ; The result is returned in the operand, i.e. *opL <- *opL * *opL 
 ; --------------------------------------------------
@@ -847,7 +855,9 @@ squareFixedPoint16
 !ifdef FIXED24 {
 ; --------------------------------------------------
 ; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4.
-; The routine multiplies the two operands and handles their signs correctly.
+; The routine multiplies the two operands and handles their signs correctly.  It is
+; assumed that the three most signifcant bytes hold the integer part. Normalization
+; is performed in such way that the resulting number also fits this format.
 ;
 ; The result is returned in the second operand, i.e. *opR <- *opL * *opR 
 ; --------------------------------------------------
@@ -859,7 +869,9 @@ mulFixedPoint24
 
 ; --------------------------------------------------
 ; This subroutine expects its operand in ARITH_SCRATCH1/2.
-; The routine squres its operand and handles the sign correctly.
+; The routine squres its operand and handles the sign correctly. It is
+; assumed that the three most signifcant bytes hold the integer part. Normalization
+; is performed in such way that the resulting number also fits this format.
 ;
 ; The result is returned in the operand, i.e. *opL <- *opL * *opL 
 ; --------------------------------------------------
