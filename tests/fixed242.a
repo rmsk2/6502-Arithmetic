@@ -1,0 +1,17 @@
+* = $0800
+
+FIXED24 = 1
+
+jmp start
+
+OPER_L
+!byte 0,0,0,0,0
+
+!zone arith
+!source "arith.a"
+
+!zone main
+
+start
+    +callFuncMono squareFixedPoint24, OPER_L
+    brk

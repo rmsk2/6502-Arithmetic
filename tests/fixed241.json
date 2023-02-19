@@ -1,0 +1,5 @@
+{
+    "Name": "24 Bit fixed point multiplication 1",
+    "TestDriverSource": "fixed241.a",
+    "TestScript": "fixed241.lua"
+}

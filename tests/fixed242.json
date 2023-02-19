@@ -1,0 +1,5 @@
+{
+    "Name": "24 Bit fixed point squaqring 1",
+    "TestDriverSource": "fixed242.a",
+    "TestScript": "fixed242.lua"
+}
