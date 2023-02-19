@@ -84,7 +84,7 @@ lowest number as well as the achievable precision correspondingly depend on the 
 part. The following table should give a first impression what this means:
 
 |Bits in integer part| Range of numbers | Smallest (absolute) number |
-|-|-|
+|-|-|-|
 |8 | -256 < x < 256 | 0.00000006 = 1/(2^24) |
 |16| -65536 < x < 65536 | 0,000015259 = 1/65536|
 |24| -16777216 < x < 16777216 | 0,00390625 = 1/256 |
