@@ -63,7 +63,7 @@ bits after the comma, followed by the next more significant bits after the comma
 bits before the fixed point. I.e. the memory layout is as follows: 
 
 ```
-sign|byte 0 fractional part|byte 1 fractional part|byte 2 fractional part|byte 3 integer part
+sign | byte 0 frac part | byte 1 frac part | byte 2 frac part | byte 3 int part
 ```
 
 examples:
