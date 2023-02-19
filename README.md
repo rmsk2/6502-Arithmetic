@@ -1,4 +1,4 @@
-# 6502 arithmetic library
+# 6502 Arithmetic Library
 
 This library implements 32 bit signed integer operations for the 6502 microprocessor. Additionally routines
 for signed fixed point multiplication and squaring can optionally be included. The following variants are
@@ -46,7 +46,7 @@ The fixed point multiplication and squaring routines can be enabled by defining 
 `FIXED8`, `FIXED16` or `FIXED24` in `main.a`.
 
 You can use the included `makefile` to build the library. The makefile also offers the possibility to test
-the correctness of the routines by calling `make test` or `make verbtest`. These target use my 
+the correctness of the routines by calling `make test` or `make verbtest`. These targets use my 
 [6502profiler](https://github.com/rmsk2/6502profiler) testing tool. The tests are a conglomerate of assembly, json 
 and Lua files and can be found in the `tests` directory.
 
