@@ -27,8 +27,7 @@ where a decimal point (or comma depending on where you live) is assumed to be an
 the above operations for fixed point numbers in the variants mentioned above. 
 
 The assembled binary has a size of about 1250 bytes in the default configuration (512 of which are part of a table 
-which is used for 16 bit multiplication) but you can customize the library to be as short as about 720 bytes. See 
-the following section about customizing what is included in the binary.
+which is used for 16 bit multiplication) but you can customize the library to be as short as about 720 bytes.
 
 # Building and customizing
 
