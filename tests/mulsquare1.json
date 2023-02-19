@@ -1,0 +1,5 @@
+{
+    "Name": "32 Bit square by multiplication",
+    "TestDriverSource": "mul_test.a",
+    "TestScript": "mulsquare1.lua"
+}

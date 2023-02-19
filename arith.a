@@ -12,7 +12,32 @@
     sta .addr+1
 }
 
+; --------------------------------------------------
+; double16Bit multiplies the 16 bit value stored at .memAddr by 2
+; --------------------------------------------------
+!macro double16Bit .memAddr {
+    asl .memAddr
+    rol .memAddr+1
+}
 
+; --------------------------------------------------
+; add16Bit implements a 16 bit add of the values stored at memAddr1 and memAddr2 
+; The result is stored in .memAddr2
+; --------------------------------------------------
+!macro add16Bit .memAddr1, .memAddr2 {
+    clc
+    ; add lo bytes
+    lda .memAddr1
+    adc .memAddr2
+    sta .memAddr2
+    ; add hi bytes
+    lda .memAddr1+1
+    adc .memAddr2+1
+    sta .memAddr2+1
+}
+
+
+!ifdef FAST_MUL {
 ; xy = (x^2 + y^2 - (x-y)^2)/2
 ; The following tables contain the LSB and MSB of i^2 where i=0, ..., 255
 SQ_TAB_LSB
@@ -101,6 +126,46 @@ mul16Bit
     +mul16BitLookup LOOKUP_SCRATCH1, LOOKUP_SCRATCH2, LOOKUP_SCRATCH3
     rts
 
+} else {
+
+SCRATCH
+!byte 0,0,0
+SCRATCH_RES
+!byte 0,0
+; --------------------------------------------------
+; mul16BitFast mutiplies the bytes contained in accu and x register 
+; The high byte of the result is returned in accu, the lo byte in the x register.
+; The three macro parameters specify temporary memory to use by the calculation.
+; --------------------------------------------------
+!macro mul16BitShiftAdd .memRes {
+    ldy #0
+    sty .memRes              ; clear result
+    sty .memRes+1             
+    sta SCRATCH              ; copy operand 1
+    sty SCRATCH+1            ; clear hibyte
+    stx SCRATCH+2            ; copy operand 2
+
+.loop
+    lsr SCRATCH+2
+    bcc .shift
+    +add16Bit SCRATCH, .memRes
+.shift
+    +double16Bit SCRATCH
+    iny
+    cpy #8
+    bne .loop
+    lda .memRes+1
+    ldx .memRes
+}
+
+; --------------------------------------------------
+; This subroutine takes its two operands in X and A and returns the result
+; The high byte of the result is returned in accu, the lo byte in the X register.
+; --------------------------------------------------
+mul16Bit
+    +mul16BitShiftAdd SCRATCH_RES
+    rts
+}
 
 ; --------------------------------------------------
 ; The 32 bit integer routines represent a number as 5 bytes. The first byte
@@ -285,6 +350,7 @@ square32BitUnsigned
     ldy COUNT_L
     cpy COUNT_R
     bne .squareNormal
+!ifdef FAST_MUL {    
     iny                           ; skip sign byte
     lda (ARITH_SCRATCH1), y       ; load COUNT_L digit of left operand 
     beq .noExtraCarrySquare
@@ -294,6 +360,9 @@ square32BitUnsigned
     lda SQ_TAB_MSB, y
     dec ARITH_SCRATCH3
     jmp .processResult
+} else {
+    dec ARITH_SCRATCH3
+}
 .squareNormal
     iny                           ; skip sign byte
     lda (ARITH_SCRATCH1), y       ; load COUNT_L digit of left operand 
@@ -667,6 +736,36 @@ neg32Bit
     sta .addr
 }
 
+!macro normalize .zp, .offset {
+    ldy #1
+.loopNorm2
+    lda TEMP_MUL-1+.offset, y
+    sta (.zp), y
+    iny
+    cpy #5
+    bne .loopNorm2
+
+}
+
+!macro mulCall .zp1, .zp2 {
+    ldy #0
+    lda (.zp1),y                ; set sign of result
+    eor (.zp2),y
+    sta (.zp2),y
+
+    jsr mul32BitUnsigned
+}
+
+!macro squareCall .zp1 {
+    ; The sign of the result always positive
+    lda #0
+    ldy #0
+    sta (.zp1), y                 
+
+    jsr square32BitUnsigned
+
+}
+
 ; --------------------------------------------------
 ; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4.
 ; The routine multiplies the two operands and handles their signs correctly.
@@ -674,25 +773,10 @@ neg32Bit
 ; The result is returned in the second operand, i.e. *opR <- *opL * *opR 
 ; --------------------------------------------------
 mul32Bit
-    ldy #0
-    lda (ARITH_SCRATCH1),y                ; set sign of result
-    eor (ARITH_SCRATCH3),y
-    sta (ARITH_SCRATCH3),y
-
-    jsr mul32BitUnsigned
-
-    ; copy bytes 0,1,2,3 from TEMP_MUL
-    ; to bytes 1,2,3,4 of (ARITH_SCRATCH3)
-    ldy #1
-.loopNorm2
-    lda TEMP_MUL-1, y
-    sta (ARITH_SCRATCH3), y
-    iny
-    cpy #5
-    bne .loopNorm2
+    +mulCall ARITH_SCRATCH1, ARITH_SCRATCH3
+    +normalize ARITH_SCRATCH3, 0
 
     rts
-
 
 ; --------------------------------------------------
 ; This subroutine expects its operand in ARITH_SCRATCH1/2.
@@ -701,22 +785,8 @@ mul32Bit
 ; The result is returned in the operand, i.e. *opL <- *opL * *opL 
 ; --------------------------------------------------
 square32Bit
-    ; The sign of the result always positive
-    lda #0
-    ldy #0
-    sta (ARITH_SCRATCH1), y                 
-
-    jsr square32BitUnsigned
-
-    ; copy bytes 0,1,2,3 from TEMP_MUL
-    ; to bytes 1,2,3,4 of (ARITH_SCRATCH1)
-    ldy #1
-.loopNorm3
-    lda TEMP_MUL-1, y
-    sta (ARITH_SCRATCH1), y
-    iny
-    cpy #5
-    bne .loopNorm3
+    +squareCall ARITH_SCRATCH1
+    +normalize ARITH_SCRATCH1, 0
 
     rts    
 

@@ -1,3 +1,8 @@
+FAST_MUL = 1
+;F8 = 1
+;F16 = 1
+;F24 = 1
+
 ; It is assumed that these values are located in the zero page
 ARITH_SCRATCH1 = $FB
 ARITH_SCRATCH2 = $FC

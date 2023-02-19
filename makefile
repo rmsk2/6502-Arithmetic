@@ -21,3 +21,6 @@ arith.bin: main.a arith.a zeropage.a
 
 test:
 	6502profiler verifyall -c $(WORKDIR)/config.json
+
+verbtest:
+	6502profiler verifyall -c $(WORKDIR)/config.json -verbose
