@@ -10,11 +10,12 @@ available
 
 It does not use any ROM routines and is therefore independent of any operating environment. In other words: 
 It should run on any machine with a compatible microprocessor. This includes: All commodore 8 bit machines,
-the Atari 8 bit machines, the Apple II, the BBC micro, the Oric, the Commander X16, heck it should even
-run on the KIM-1. The following routines are provided:
+the Atari 8 bit machines, the Apple II, the BBC micro, the Acorn Electron, the Oric, the Commander X16, heck 
+it should even run on the KIM-1. The following routines are provided:
 
 - Addition
 - Subtraction
+- Negation
 - Comparisons: Equality, test for zero, greater or equal
 - Multiplication
 - Squaring
@@ -55,7 +56,7 @@ In fixed point arithmetic we assume that in each 32 bit number there is a decima
 In this library there are routines that assume this position to be after the first, second or third most significant byte. 
 Let's make this a bit more concrete by assuming that the comma is after the most significant byte. In this case we have
 one byte as an integer part and three bytes as a fractional part. The largest number that can be represented in this
-format is 255 + 1/2 + 1/4 + 1/16 + 1/32 + ..... + 1/(2^24).
+format is 255 + 1/2 + 1/4 + 1/8 + 1/16 + 1/32 + ..... + 1/(2^24).
 
 In memory this number is represented as 5 bytes. The first byte (i.e. the byte at the lowest address) is the sign byte where 1 
 indicates a negative sign and 0 a positive sign. The sign byte is followed by the byte holding the eight least significant 
