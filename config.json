@@ -1,12 +1,12 @@
 {
-    "Model": 0,
+    "Model": "6502",
     "MemSpec": "Linear16K",
     "IoMask": 45,
     "IoAddrConfig": {
     },
     "PreLoad": {
     },
-    "AcmeBinary": "/Users/martin/data/acme/acme",
+    "AcmeBinary": "acme",
     "AcmeSrcDir": "./",
     "AcmeBinDir": "./tests/bin",
     "AcmeTestDir": "./tests"
