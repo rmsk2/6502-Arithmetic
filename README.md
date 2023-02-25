@@ -9,7 +9,7 @@ available
 - 24 bit integer and 8 bit fractional part
 
 It does not use any ROM routines and is therefore independent of any operating environment. In other words: 
-It should run on any machine with a compatible microprocessor. This includes: All commodore 8 bit machines,
+It should run on any machine with a compatible microprocessor. This includes: All Commodore 8 bit machines,
 the Atari 8 bit machines, the Apple II, the BBC micro, the Acorn Electron, the Oric, the Commander X16, heck 
 it should even run on the KIM-1. The following routines are provided:
 
