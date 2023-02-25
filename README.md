@@ -81,7 +81,7 @@ be two or three bytes.
 
 The maximum number that can be represented obviously depends of the number of bytes that make up the integer part and the 
 lowest number as well as the achievable precision correspondingly depend on the number of bytes that are used for the fractional 
-part. The following table should give a first impression what this means:
+part. The following table should give a first impression of what this means:
 
 |Bits in integer part| Range of numbers | Smallest (absolute) number |
 |-|-|-|
