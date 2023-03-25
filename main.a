@@ -61,4 +61,7 @@ FP24_SQU
 !skip 6    ; make sure address of following routines does not change
 }
 
+I32_CLR
+    jmp clear32Bit
+
 !source "arith.a"

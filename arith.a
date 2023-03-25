@@ -491,6 +491,19 @@ isZero32Bit
 
 
 ; --------------------------------------------------
+; This subroutine expects its operand in the zero page pointer ARITH_SCRATCH1 and clears
+; it, i.e. sets its value to +0
+; --------------------------------------------------
+clear32Bit
+    ldy #4
+    lda #0
+.loopClear
+    sta (ARITH_SCRATCH1), y
+    dey
+    bpl .loopClear
+    rts
+
+; --------------------------------------------------
 ; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4 
 ; and compares them also considering the sign byte.
 ;
