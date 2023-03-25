@@ -2,7 +2,7 @@ function arrange()
 end
 
 function assert()
-    clr = get_memory(2048+3, 5)
+    clr = get_memory(load_address+3, 5)
 
     if clr == "0000000000" then
         return true, ""
