@@ -1,4 +1,5 @@
 function arrange()
+    set_memory(load_address+3, "01FFFFFFFF")
 end
 
 function assert()
