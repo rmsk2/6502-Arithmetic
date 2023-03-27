@@ -1,5 +1,0 @@
-{
-    "Name": "16 Bit multiplication 4",
-    "TestDriverSource": "mul16_bit.a",
-    "TestScript": "mul164.lua"
-}
