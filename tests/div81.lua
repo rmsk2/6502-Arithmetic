@@ -8,7 +8,8 @@ test_data = {
     [7] = {val1 = 1, val2 = 183},
     [8] = {val1 = 64, val2 = 32},
     [9] = {val1 = 122, val2 = 10},
-    [10] = {val1 = 122, val2 = 122}
+    [10] = {val1 = 122, val2 = 122},
+    [11] = {val1 = 183, val2 = 1},
 }
 
 function num_iterations() 
