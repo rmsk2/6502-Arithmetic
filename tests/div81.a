@@ -1,0 +1,10 @@
+* = $0800
+
+jmp main
+
+!source "zeropage.a"
+!source "arith.a"
+
+main
+    jsr divMod8Bit
+    brk

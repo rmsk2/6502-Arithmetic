@@ -1,0 +1,5 @@
+{
+    "Name": "8 by 8 bit division 1",
+    "TestDriverSource": "div81.a",
+    "TestScript": "div81.lua"
+}

@@ -167,6 +167,52 @@ mul16Bit
     rts
 }
 
+
+; --------------------------------------------------
+; This subroutine takes its two 8 bit operands in the accu and the x register and divides
+; them. The division result of A / X is returned in A and the remainder is returned in
+; X. This is taken from
+; 
+; https://www.retro-programming.de/programming/assembler/fuer-fortgeschrittene/mul-div-ganzzahl/
+;
+; and modified by me including a bug fix for all cases where the dividend is smaller than the divisor. 
+; In the original code the remainder was zero and not ZP_DIVIDEND in these cases.
+; --------------------------------------------------
+divMod8Bit
+    sta ZP_DIVIDEND
+    stx ZP_DIVISOR
+    lda #$00                       ; erstmal eine 0
+    sta ZP_RESULT                  ; ins Ergebnis
+    sta ZP_HELP                    ; und in die Hilfsvariable
+    lda ZP_DIVIDEND
+    cmp ZP_DIVISOR                 ; DIVIDEND < DIVISOR?
+    bcc .dividendLtDivisor          ; yes => do nothing, as the result data (ZP_RESULT = 0, ZP_DIVIDEND is remainder) is correct
+    lda ZP_DIVISOR                 ; prüfen ob durch 0 geteilt werden soll
+    beq .stopPrg                   ; In case divisor is zero stop program
+    ldx #$08                       ; acht Schleifendurchläufe
+.loop
+    asl ZP_DIVIDEND                ; höchstes BIT ins Carry-Flag shiften
+    rol ZP_HELP                    ; C-Flag ins niedrigste BIT rotieren 
+    lda ZP_HELP                    ; ZP_HELP in den Akku
+    cmp ZP_DIVISOR                 ; prüfen ob ZP_HELP größer/gleich Divisor
+    bcc .skip                      ; falls nein -> weiter bei .skip
+    sbc ZP_DIVISOR                 ; sonst Divisor vom Akku abziehen
+    sta ZP_HELP                    ; Akku bei ZP_HELP speichern
+.skip
+    rol ZP_RESULT                  ; C-Flag ins Ergebnis rotieren
+    dex                            ; Schleifenzähler verringern
+    bne .loop                      ; solange größer 0, nochmal -> .loop
+.exit 
+    lda ZP_RESULT                  ; Here the result is always nonzero as DIVIDEND >= DIVISOR
+    ldx ZP_HELP
+    rts
+.dividendLtDivisor
+    lda #0
+    ldx ZP_DIVIDEND
+    rts
+.stopPrg
+    brk
+
 ; --------------------------------------------------
 ; The 32 bit integer routines represent a number as 5 bytes. The first byte
 ; is the sign where 1 indicates a negative sign and 0 a positive sign. The sign byte
@@ -416,6 +462,23 @@ square32BitUnsigned
 .squareDone
     rts
 
+
+RES_DIV
+!byte 0,0,0,0
+
+RES_REM
+!byte 0,0,0,0
+
+; --------------------------------------------------
+; This subroutine expects operand one in ARITH_SCRATCH1/2 and operand two in ARITH_SCRATCH3/4 
+; and determines the division result and remainder when dividing operand one by operand two. This 
+; routine ignores the sign byte and treats its operands as positive integers. It also assumes that
+; operand one is greater or equal to operand two. And it assumes that operand two is not zero.
+; 
+; The result is returned in the buffers RES_DIV and RES_REM. 
+; --------------------------------------------------
+divMod32BitUnsigned
+    rts
 
 ; --------------------------------------------------
 ; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4 
