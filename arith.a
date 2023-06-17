@@ -190,10 +190,10 @@ divMod8Bit
     lda ZP_DIVISOR                 ; prüfen ob durch 0 geteilt werden soll
     beq .stopPrg                   ; In case divisor is zero stop program
 
-    ; check if dividend < divisor
+    ;check if dividend < divisor
     lda ZP_DIVIDEND
     cmp ZP_DIVISOR                 ; dividend < divisor?
-    bcc .dividendLtDivisor         ; yes => The result is obvious (A = 0, X = ZP_DIVIDEND) and the rest of the code does not handle this case correctly
+    bcc .dividendLtDivisor         ; yes => The result is obvious (A = 0, X = ZP_DIVIDEND)
 
     ; perform division
     ldx #$08                       ; acht Schleifendurchläufe
