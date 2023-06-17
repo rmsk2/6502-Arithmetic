@@ -171,7 +171,7 @@ mul16Bit
 ; --------------------------------------------------
 ; This subroutine takes its two 8 bit operands in the accu and the x register and divides
 ; them. The division result of A / X is returned in A and the remainder is returned in
-; X. This is taken from
+; X. Code is originally from
 ; 
 ; https://www.retro-programming.de/programming/assembler/fuer-fortgeschrittene/mul-div-ganzzahl/
 ;
@@ -179,16 +179,23 @@ mul16Bit
 ; In the original code the remainder was zero and not ZP_DIVIDEND in these cases.
 ; --------------------------------------------------
 divMod8Bit
+    ; setup state
     sta ZP_DIVIDEND
     stx ZP_DIVISOR
     lda #$00                       ; erstmal eine 0
     sta ZP_RESULT                  ; ins Ergebnis
     sta ZP_HELP                    ; und in die Hilfsvariable
-    lda ZP_DIVIDEND
-    cmp ZP_DIVISOR                 ; DIVIDEND < DIVISOR?
-    bcc .dividendLtDivisor          ; yes => do nothing, as the result data (ZP_RESULT = 0, ZP_DIVIDEND is remainder) is correct
+
+    ; check for divison by zero
     lda ZP_DIVISOR                 ; prüfen ob durch 0 geteilt werden soll
     beq .stopPrg                   ; In case divisor is zero stop program
+
+    ; check if dividend < divisor
+    lda ZP_DIVIDEND
+    cmp ZP_DIVISOR                 ; DIVIDEND < DIVISOR?
+    bcc .dividendLtDivisor         ; yes => do nothing, as the result data (ZP_RESULT = 0, ZP_DIVIDEND is remainder) is correct
+
+    ; perform division
     ldx #$08                       ; acht Schleifendurchläufe
 .loop
     asl ZP_DIVIDEND                ; höchstes BIT ins Carry-Flag shiften
@@ -202,7 +209,6 @@ divMod8Bit
     rol ZP_RESULT                  ; C-Flag ins Ergebnis rotieren
     dex                            ; Schleifenzähler verringern
     bne .loop                      ; solange größer 0, nochmal -> .loop
-.exit 
     lda ZP_RESULT                  ; Here the result is always nonzero as DIVIDEND >= DIVISOR
     ldx ZP_HELP
     rts

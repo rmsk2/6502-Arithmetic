@@ -10,6 +10,7 @@ test_data = {
     [9] = {val1 = 122, val2 = 10},
     [10] = {val1 = 122, val2 = 122},
     [11] = {val1 = 183, val2 = 1},
+    [12] = {val1 = 27, val2 = 9},
 }
 
 function num_iterations() 
