@@ -193,7 +193,7 @@ divMod8Bit
     ; check if dividend < divisor
     lda ZP_DIVIDEND
     cmp ZP_DIVISOR                 ; DIVIDEND < DIVISOR?
-    bcc .dividendLtDivisor         ; yes => do nothing, as the result data (ZP_RESULT = 0, ZP_DIVIDEND is remainder) is correct
+    bcc .dividendLtDivisor         ; yes => The result is obvious (A = 0, X = ZP_DIVIDEND) and the rest of the code can not handle this case correctly
 
     ; perform division
     ldx #$08                       ; acht Schleifendurchläufe
