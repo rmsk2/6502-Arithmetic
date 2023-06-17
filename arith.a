@@ -192,8 +192,8 @@ divMod8Bit
 
     ; check if dividend < divisor
     lda ZP_DIVIDEND
-    cmp ZP_DIVISOR                 ; DIVIDEND < DIVISOR?
-    bcc .dividendLtDivisor         ; yes => The result is obvious (A = 0, X = ZP_DIVIDEND) and the rest of the code can not handle this case correctly
+    cmp ZP_DIVISOR                 ; dividend < divisor?
+    bcc .dividendLtDivisor         ; yes => The result is obvious (A = 0, X = ZP_DIVIDEND) and the rest of the code does not handle this case correctly
 
     ; perform division
     ldx #$08                       ; acht Schleifendurchläufe
@@ -209,7 +209,7 @@ divMod8Bit
     rol ZP_RESULT                  ; C-Flag ins Ergebnis rotieren
     dex                            ; Schleifenzähler verringern
     bne .loop                      ; solange größer 0, nochmal -> .loop
-    lda ZP_RESULT                  ; Here the result is always nonzero as DIVIDEND >= DIVISOR
+    lda ZP_RESULT                  
     ldx ZP_HELP
     rts
 .dividendLtDivisor
