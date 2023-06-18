@@ -122,6 +122,16 @@
 .unequal2
 }
 
+!macro callFunc .func, .addrL, .addrR {
+    +load16BitImmediate .addrL, ARITH_SCRATCH1
+    +load16BitImmediate .addrR, ARITH_SCRATCH3
+    jsr .func
+}
+
+!macro callFuncMono .func, .addrL {
+    +load16BitImmediate .addrL, ARITH_SCRATCH1
+    jsr .func
+}
 
 !ifdef FAST_MUL {
 ; xy = (x^2 + y^2 - (x-y)^2)/2
@@ -603,22 +613,76 @@ square32BitUnsigned
     rts
 
 
-RES_DIV
-!byte 0,0,0,0
+div32_RES_DIV
+!byte 0,0,0,0,0
+div32_RES_REM
+!byte 0,0,0,0,0
+div32_HELP
+!byte 0,0,0,0,0
+div32_DIVIDEND
+!byte 0,0,0,0,0
+div32_DIVISOR
+!byte 0,0,0,0,0
 
-RES_REM
-!byte 0,0,0,0
+ADDR_TEMP1
+!byte 0, 0
+ADDR_TEMP2
+!byte 0, 0
 
 ; --------------------------------------------------
 ; This subroutine expects operand one in ARITH_SCRATCH1/2 and operand two in ARITH_SCRATCH3/4 
 ; and determines the division result and remainder when dividing operand one by operand two. This 
-; routine ignores the sign byte and treats its operands as positive integers. It also assumes that
-; operand one is greater or equal to operand two. And it assumes that operand two is not zero.
+; routine ignores the sign byte and treats its operands as positive integers. 
 ; 
 ; The result is returned in the buffers RES_DIV and RES_REM. 
 ; --------------------------------------------------
 divMod32BitUnsigned
+    ; save pointers to input data
+    +move16Bit ARITH_SCRATCH1, ADDR_TEMP1                        ; save address of dividend
+    +move16Bit ARITH_SCRATCH3, ADDR_TEMP2                        ; save address of divisor
+
+    ; copy dividend to div32_DIVIDEND
+    ;+move16Bit ADDR_TEMP1, ARITH_SCRATCH1
+    +load16BitImmediate div32_DIVIDEND, ARITH_SCRATCH3
+    jsr move32Bit
+
+    ; copy divisor to div32_DIVISOR
+    +move16Bit ADDR_TEMP2, ARITH_SCRATCH1
+    +load16BitImmediate div32_DIVISOR, ARITH_SCRATCH3
+    jsr move32Bit
+
+    ; setup state
+    +callFuncMono clear32Bit, div32_RES_DIV
+    +callFuncMono clear32Bit, div32_HELP
+
+    ; check for divison by zero
+    +callFuncMono isZero32Bit, div32_DIVISOR
+    bne .noDivZero
+    brk
+.noDivZero
+
+    ;check if dividend < divisor
+    +callFunc cmp32Bit, div32_DIVIDEND, div32_DIVISOR
+    bcc .dividendTooShort
+
+    ; perform division
+    ldx #32
+.loop32
+    +callFuncMono double32Bit, div32_DIVIDEND             
+    +callFuncMono rotateLeft32Bit, div32_HELP     
+    +callFunc cmp32Bit, div32_HELP, div32_DIVISOR
+    bcc .skip32                         
+    +callFunc sub32BitUnsigned, div32_DIVISOR, div32_HELP
+.skip32
+    +callFuncMono rotateLeft32Bit, div32_RES_DIV
+    dex                                 
+    bne .loop32                         
+    +callFunc move32Bit, div32_HELP, div32_RES_REM                  
+    rts    
+.dividendTooShort
+    +callFunc move32Bit, div32_DIVIDEND, div32_RES_REM
     rts
+
 
 ; --------------------------------------------------
 ; This subroutine expects its operands in ARITH_SCRATCH1/2 and ARITH_SCRATCH3/4 
@@ -819,6 +883,37 @@ double32Bit
 
 
 ; --------------------------------------------------
+; This subroutine expects its operand in ARITH_SCRATCH1/2.
+; The routine then rotates the value of its operand by performing a left shift which
+; takes the carry into account. It ignores the sign byte.
+;
+; The operand is modified, i.e. *op <- rol *op 
+; --------------------------------------------------
+rotateLeft32Bit
+    ldy #1                        ; skip sign value
+    lda (ARITH_SCRATCH1),y
+    rol
+    sta (ARITH_SCRATCH1),y
+
+    iny
+    lda (ARITH_SCRATCH1),y
+    rol
+    sta (ARITH_SCRATCH1),y
+
+    iny
+    lda (ARITH_SCRATCH1),y
+    rol
+    sta (ARITH_SCRATCH1),y
+
+    iny
+    lda (ARITH_SCRATCH1),y
+    rol
+    sta (ARITH_SCRATCH1),y
+
+    rts
+
+
+; --------------------------------------------------
 ; This subroutine expects it operand in ARITH_SCRATCH1/2.
 ; The routine then halves the value of its operand by simply performing a right shift. It
 ; ignores the sign byte.
@@ -826,10 +921,9 @@ double32Bit
 ; The operand is modified, i.e. *op <- *op / 2 
 ; --------------------------------------------------
 halve32Bit
-    clc
     ldy #4 
     lda (ARITH_SCRATCH1),y                       
-    ror 
+    lsr 
     sta (ARITH_SCRATCH1),y
     dey
 
@@ -1100,14 +1194,5 @@ squareFixedPoint24
 }
 
 
-!macro callFunc .func, .addrL, .addrR {
-    +load16BitImmediate .addrL, ARITH_SCRATCH1
-    +load16BitImmediate .addrR, ARITH_SCRATCH3
-    jsr .func
-}
 
-!macro callFuncMono .func, .addrL {
-    +load16BitImmediate .addrL, ARITH_SCRATCH1
-    jsr .func
-}
 
