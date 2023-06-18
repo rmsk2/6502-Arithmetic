@@ -672,7 +672,7 @@ divMod32BitUnsigned
     +callFuncMono rotateLeft32Bit, div32_HELP     
     +callFunc cmp32Bit, div32_HELP, div32_DIVISOR
     bcc .skip32                         
-    +callFunc sub32BitUnsigned, div32_DIVISOR, div32_HELP
+    +callFunc sub32SwitchedUnsigned, div32_DIVISOR, div32_HELP
 .skip32
     +callFuncMono rotateLeft32Bit, div32_RES_DIV
     dex                                 

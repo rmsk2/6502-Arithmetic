@@ -70,5 +70,8 @@ U8_DIVMOD
 U16_DIVMOD
     jmp divMod16Bit
 
+U32_DIVMOD
+    jmp divMod32BitUnsigned
+
 
 !source "arith.a"

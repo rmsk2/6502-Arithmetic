@@ -23,13 +23,16 @@ feature of the F256) heck it should even run on the KIM-1. The following routine
 - Left and right shifting one bit (i.e. multiplication and division by 2)
 - Copying (moving) 
 - 8 by 8 bit unsigned multiplication with a 16 bit result
+- 8, 16 and 32 bit divison on unsigned integers
 
-General division is **not** implemented. Apart from multiplication and squaring the routines do not care about
-where a decimal point (or comma depending on where you live) is assumed to be and so the library also provides
-the above operations for fixed point numbers in the variants mentioned above. 
+General division is only implemented for 8, 16 or 32 bit *unisgned integers*. 32 bit divison is about five times
+slower than 32 bit multiplication (multiplication takes about 3000 clock cycles, division about 15000 cycles). Apart 
+from multiplication and squaring the routines do not care about where a decimal point (or comma depending on where you 
+live) is assumed to be and so the library also provides the above operations for fixed point numbers in the variants 
+mentioned above. 
 
-The assembled binary has a size of about 1250 bytes in the default configuration (512 of which are part of a table 
-which is used for 16 bit multiplication) but you can customize the library to be as short as about 720 bytes.
+The assembled binary has a size of about 1755 bytes in the default configuration (512 of which are part of a table 
+which is used for 16 bit multiplication) but you can customize the library to be as short as about 1200 bytes.
 
 # Building and customizing
 
