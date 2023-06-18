@@ -1,0 +1,22 @@
+* = $0800
+
+jmp main
+
+DIVISOR
+!byte 0,0,0,0,0
+DIVIDEND
+!byte 0,0,0,0,0
+DIV_RES
+!byte 0,0,0,0,0
+DIV_REM
+!byte 0,0,0,0,0
+
+
+!source "zeropage.a"
+!source "arith.a"
+
+main
+    +callFunc divMod32BitUnsigned, DIVIDEND, DIVISOR
+    +callFunc move32Bit, div32_RES_DIV, DIV_RES
+    +callFunc move32Bit, div32_RES_REM, DIV_REM
+    brk
