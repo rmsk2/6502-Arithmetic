@@ -92,3 +92,8 @@ part. The following table should give a first impression of what this means:
 |8 | -256 < x < 256 | 0.00000006 = 1/(2^24) |
 |16| -65536 < x < 65536 | 0.000015259 = 1/65536|
 |24| -16777216 < x < 16777216 | 0.00390625 = 1/256 |
+
+# What's next?
+- Optimize divison
+- Rethink interface of division routine
+- Handle sign correctly in 32 bit divison 
