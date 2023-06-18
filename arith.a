@@ -13,12 +13,39 @@
 }
 
 ; --------------------------------------------------
-; double16Bit multiplies the 16 bit value stored at .memAddr by 2
+; asl16Bit multiplies the 16 bit value stored at .memAddr by 2
 ; --------------------------------------------------
-!macro double16Bit .memAddr {
+!macro asl16Bit .memAddr {
     asl .memAddr
     rol .memAddr+1
 }
+
+
+; --------------------------------------------------
+; rol16Bit rotates the 16 bit value stored at .memAddr on bit to the left
+; --------------------------------------------------
+!macro rol16Bit .memAddr {
+    rol .memAddr
+    rol .memAddr+1
+}
+
+
+; --------------------------------------------------
+; lsr16Bit divides the 16 bit value stored at .memAddr by 2
+; --------------------------------------------------
+!macro lsr16Bit .memAddr {
+    lsr .memAddr+1
+    ror .memAddr
+}
+
+; --------------------------------------------------
+; ror16Bit rotates the 16 bit value stored at .memAddr one bit to the right
+; --------------------------------------------------
+!macro ror16Bit .memAddr {
+    ror .memAddr+1
+    ror .memAddr
+}
+
 
 ; --------------------------------------------------
 ; add16Bit implements a 16 bit add of the values stored at memAddr1 and memAddr2 
@@ -34,6 +61,65 @@
     lda .memAddr1+1
     adc .memAddr2+1
     sta .memAddr2+1
+}
+
+
+; --------------------------------------------------
+; sub16Bit subtracts the value stored at .memAddr1 from the value stored at the
+; address .memAddr2. The result is stored in .memAddr2
+; --------------------------------------------------
+!macro sub16Bit .memAddr1, .memAddr2 {
+    sec
+    lda .memAddr2
+    sbc .memAddr1
+    sta .memAddr2
+    lda .memAddr2+1
+    sbc .memAddr1+1
+    sta .memAddr2+1
+}
+
+
+; --------------------------------------------------
+; move16Bit copies the 16 bit value stored at .memAddr1 to .memAddr2
+; --------------------------------------------------
+!macro move16Bit .memAddr1, .memAddr2 {
+    ; copy lo byte
+    lda .memAddr1
+    sta .memAddr2
+    ; copy hi byte
+    lda .memAddr1+1
+    sta .memAddr2+1
+}
+
+
+; --------------------------------------------------
+; cmp16Bit compares the 16 bit values stored at memAddr1 and memAddr2 
+; Z  flag is set in case these values are equal
+; --------------------------------------------------
+!macro cmp16Bit .memAddr1, .memAddr2 {
+    lda .memAddr1+1
+    cmp .memAddr2+1
+    bne .unequal
+    lda .memAddr1
+    cmp .memAddr2
+.unequal
+}
+
+
+; --------------------------------------------------
+; cmp16BitImmediate compares the 16 bit value stored at memAddr with
+; the immediate value given in .value.
+; 
+; Z  flag is set in case these values are equal. Carry is set
+; if .value is greater or equal than the value store at .memAddr
+; --------------------------------------------------
+!macro cmp16BitImmediate .value, .memAddr {
+    lda #>.value
+    cmp .memAddr+1
+    bne .unequal2
+    lda #<.value
+    cmp .memAddr
+.unequal2
 }
 
 
@@ -150,7 +236,7 @@ SCRATCH_RES
     bcc .shift
     +add16Bit SCRATCH, .memRes
 .shift
-    +double16Bit SCRATCH
+    +asl16Bit SCRATCH
     iny
     cpy #8
     bne .loop
@@ -171,7 +257,7 @@ mul16Bit
 ; --------------------------------------------------
 ; This subroutine takes its two 8 bit operands in the accu and the x register and divides
 ; them. The division result of A / X is returned in A and the remainder is returned in
-; X. Code is originally from
+; X. Code originally taken from
 ; 
 ; https://www.retro-programming.de/programming/assembler/fuer-fortgeschrittene/mul-div-ganzzahl/
 ;
@@ -218,6 +304,54 @@ divMod8Bit
     rts
 .stopPrg
     brk
+
+
+div16_DIVIDEND
+!byte 0,0
+div16_DIVISOR
+!byte 0,0
+div16_RESULT
+!byte 0,0
+div16_REMAINDER
+!byte 0,0
+div16_HELP
+!byte 0,0
+
+; --------------------------------------------------
+; This subroutine takes its two 16 bit operands from the addresses div16_DIVIDEND and div16_DIVISOR 
+; and divides them. The division result is returned in div16_RESULT and the remainder is returned in
+; div16_REMAINDER.
+; --------------------------------------------------
+divMod16Bit
+    ; setup state
+    +load16BitImmediate 0, div16_RESULT
+    +load16BitImmediate 0, div16_HELP
+
+    ; check for divison by zero
+    +cmp16BitImmediate 0, div16_DIVISOR
+    beq .stopPrg
+
+    ;check if dividend < divisor
+    +cmp16Bit div16_DIVIDEND, div16_DIVISOR
+    bcc .dividendTooSmall
+
+    ; perform division
+    ldx #16
+.loop16
+    +asl16Bit div16_DIVIDEND             
+    +rol16Bit div16_HELP                 
+    +cmp16Bit div16_HELP, div16_DIVISOR
+    bcc .skip16                         
+    +sub16Bit div16_DIVISOR, div16_HELP
+.skip16
+    +rol16Bit div16_RESULT               
+    dex                                 
+    bne .loop16                         
+    +move16Bit div16_HELP, div16_REMAINDER                  
+    rts
+.dividendTooSmall
+    +move16Bit div16_DIVIDEND, div16_REMAINDER
+    rts 
 
 ; --------------------------------------------------
 ; The 32 bit integer routines represent a number as 5 bytes. The first byte

@@ -1,0 +1,24 @@
+* = $0800
+
+jmp main
+
+DIVISOR
+!byte 0,0
+DIVIDEND
+!byte 0,0
+DIV_RES
+!byte 0,0
+DIV_REM
+!byte 0,0
+
+
+!source "zeropage.a"
+!source "arith.a"
+
+main
+    +move16Bit DIVIDEND, div16_DIVIDEND
+    +move16Bit DIVISOR, div16_DIVISOR
+    jsr divMod16Bit
+    +move16Bit div16_RESULT, DIV_RES
+    +move16Bit div16_REMAINDER, DIV_REM
+    brk

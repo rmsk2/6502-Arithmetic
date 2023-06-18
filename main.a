@@ -64,4 +64,11 @@ FP24_SQU
 I32_CLR
     jmp clear32Bit
 
+U8_DIVMOD
+    jmp divMod8Bit
+
+U16_DIVMOD
+    jmp divMod16Bit
+
+
 !source "arith.a"
