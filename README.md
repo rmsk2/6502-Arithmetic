@@ -23,7 +23,7 @@ feature of the F256) heck it should even run on the KIM-1. The following routine
 - Left and right shifting one bit (i.e. multiplication and division by 2)
 - Copying (moving) 
 - 8 by 8 bit unsigned multiplication with a 16 bit result
-- 8, 16 and 32 bit divison on unsigned integers
+- 8, 16 and 32 bit divison of unsigned integers
 
 General division is only implemented for 8, 16 or 32 bit *unisgned integers*. 32 bit divison is roughly five times
 slower than 32 bit multiplication (multiplication takes about 3000 clock cycles, division about 15000 cycles). Apart 
