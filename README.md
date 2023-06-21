@@ -25,8 +25,8 @@ feature of the F256) heck it should even run on the KIM-1. The following routine
 - 8 by 8 bit unsigned multiplication with a 16 bit result
 - 8, 16 and 32 bit divison of unsigned integers
 
-General division is only implemented for 8, 16 or 32 bit *unisgned integers*. 32 bit divison is roughly five times
-slower than 32 bit multiplication (multiplication takes about 3000 clock cycles, division about 15000 cycles). Apart 
+General division is only implemented for 8, 16 or 32 bit *unisgned integers*. 32 bit divison is roughly 1.6 times
+slower than 32 bit multiplication (multiplication takes about 3000 clock cycles, division about 5000 cycles). Apart 
 from multiplication and squaring the routines do not care about where a decimal point (or comma depending on where you 
 live) is assumed to be and so the library also provides the above operations for fixed point numbers in the variants 
 mentioned above. 
@@ -94,6 +94,5 @@ part. The following table should give a first impression of what this means:
 |24| -16777216 < x < 16777216 | 0.00390625 = 1/256 |
 
 # What's next?
-- Optimize divison
 - Rethink interface of division routine
 - Handle sign correctly in 32 bit divison 

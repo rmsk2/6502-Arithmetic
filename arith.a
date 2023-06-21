@@ -660,21 +660,64 @@ divMod32BitUnsigned
     bne .noDivZero
     brk
 .noDivZero
-
     ;check if dividend < divisor
     +callFunc cmp32Bit, div32_DIVIDEND, div32_DIVISOR
-    bcc .dividendTooShort
-
+    bcs .goOn32
+    jmp .dividendTooShort
+.goOn32
     ; perform division
     ldx #32
 .loop32
-    +callFuncMono double32Bit, div32_DIVIDEND             
-    +callFuncMono rotateLeft32Bit, div32_HELP     
-    +callFunc cmp32Bit, div32_HELP, div32_DIVISOR
-    bcc .skip32                         
-    +callFunc sub32SwitchedUnsigned, div32_DIVISOR, div32_HELP
+    ;+callFuncMono double32Bit, div32_DIVIDEND
+    asl div32_DIVIDEND+1
+    rol div32_DIVIDEND+2
+    rol div32_DIVIDEND+3
+    rol div32_DIVIDEND+4
+    ;+callFuncMono rotateLeft32Bit, div32_HELP                
+    rol div32_HELP+1
+    rol div32_HELP+2
+    rol div32_HELP+3
+    rol div32_HELP+4
+    ;+callFunc cmp32Bit, div32_HELP, div32_DIVISOR
+    lda div32_HELP+4
+    cmp div32_DIVISOR+4
+    beq .n1                   
+    jmp .endCmp32                                
+.n1
+    lda div32_HELP+3
+    cmp div32_DIVISOR+3
+    beq .n2                   
+    jmp .endCmp32
+.n2
+    lda div32_HELP+2
+    cmp div32_DIVISOR+2
+    beq .n3
+    jmp .endCmp32
+.n3
+    lda div32_HELP+1
+    cmp div32_DIVISOR+1
+.endCmp32
+    ;+callFunc sub32SwitchedUnsigned, div32_DIVISOR, div32_HELP
+    bcc .skip32
+    sec
+    lda div32_HELP+1
+    sbc div32_DIVISOR+1
+    sta div32_HELP+1
+    lda div32_HELP+2
+    sbc div32_DIVISOR+2
+    sta div32_HELP+2
+    lda div32_HELP+3
+    sbc div32_DIVISOR+3
+    sta div32_HELP+3
+    lda div32_HELP+4
+    sbc div32_DIVISOR+4
+    sta div32_HELP+4
 .skip32
-    +callFuncMono rotateLeft32Bit, div32_RES_DIV
+    ;+callFuncMono rotateLeft32Bit, div32_RES_DIV
+    rol div32_RES_DIV+1
+    rol div32_RES_DIV+2
+    rol div32_RES_DIV+3
+    rol div32_RES_DIV+4 
     dex                                 
     bne .loop32                         
     +callFunc move32Bit, div32_HELP, div32_RES_REM                  
