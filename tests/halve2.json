@@ -1,5 +1,0 @@
-{
-    "Name": "32 Bit halve 2",
-    "TestDriverSource": "halve1.a",
-    "TestScript": "halve2.lua"
-}

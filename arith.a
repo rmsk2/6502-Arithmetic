@@ -696,9 +696,9 @@ divMod32BitUnsigned
 .n3
     lda div32_HELP+1
     cmp div32_DIVISOR+1
-.endCmp32
-    ;+callFunc sub32SwitchedUnsigned, div32_DIVISOR, div32_HELP
+.endCmp32    
     bcc .skip32
+    ;+callFunc sub32SwitchedUnsigned, div32_DIVISOR, div32_HELP
     sec
     lda div32_HELP+1
     sbc div32_DIVISOR+1

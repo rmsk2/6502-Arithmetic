@@ -1,5 +1,0 @@
-{
-    "Name": "32 Bit negate 2",
-    "TestDriverSource": "neg1.a",
-    "TestScript": "neg2.lua"
-}

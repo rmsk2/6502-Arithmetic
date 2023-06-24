@@ -1,5 +1,0 @@
-{
-    "Name": "32 bit multiplication 3",
-    "TestDriverSource": "mul_test.a",
-    "TestScript": "mul3.lua"
-}
