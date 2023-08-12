@@ -634,7 +634,7 @@ ADDR_TEMP2
 ; and determines the division result and remainder when dividing operand one by operand two. This 
 ; routine ignores the sign byte and treats its operands as positive integers. 
 ; 
-; The result is returned in the buffers RES_DIV and RES_REM. 
+; The result is returned in the buffers div32_RES_DIV and div32_RES_REM. 
 ; --------------------------------------------------
 divMod32BitUnsigned
     ; save pointers to input data
