@@ -43,7 +43,7 @@ current values in this file are tuned for the Commodore 64. The target address c
 file by modifying the `* = ....` pseudo opcode. Documentation for the routines is provided in the source code as 
 comments.
 
-The file `arith.a` can be customized to get rid of the multiplication table in order to save same space by not
+The file `arith.a` can be customized to get rid of the multiplication table in order to save some space by not
 defining the variable `FAST_MUL` in `zeropage.a`. Beware though that the performance hit for multiplication and 
 squaring is significant (3-4 times slower). 
 
