@@ -94,6 +94,11 @@ part. The following table should give a first impression of what this means:
 |16| -65536 < x < 65536 | 0.000015259 = 1/65536|
 |24| -16777216 < x < 16777216 | 0.00390625 = 1/256 |
 
+Fixed point multiplication and squaring are performed internally using the full 64 bit result in order to maximize the achieveable 
+accuracy. As the multiplication and squaring routines are agnostic whith respect to the position or the absence of the assumed fixed 
+point this unfortunately means that quite a few unneccessary operations are peformed for multiplication or squaring of 32 bit 
+integers if you are only interested in the 32 bit integer result of these calculations.
+
 # What's next?
 - Rethink interface of division routine
 - Handle sign correctly in 32 bit divison 
